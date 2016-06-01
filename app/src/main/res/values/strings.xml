@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Filters</string>
+    <string name="gallery">Import from Gallery</string>
+    <string name="camera">Open Camera</string>
+</resources>
