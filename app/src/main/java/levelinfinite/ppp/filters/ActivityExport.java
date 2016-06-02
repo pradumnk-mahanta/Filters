@@ -1,10 +1,10 @@
 package levelinfinite.ppp.filters;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ActivityExport extends AppCompatActivity {
+public class ActivityExport extends Activity {
 
     Button exportButton;
     String exportPhotoPath;
@@ -29,7 +29,6 @@ public class ActivityExport extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
-
         byte[] pictureArray = getIntent().getByteArrayExtra("finalImage");
         imageToExport = BitmapFactory.decodeByteArray(pictureArray, 0, pictureArray.length);
 
@@ -66,6 +65,13 @@ public class ActivityExport extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent activityFilters = new Intent(getApplicationContext(), ActivityFilters.class);
+        startActivity(activityFilters);
+        finish();
     }
 
     private File createImageFile(String customName) throws IOException {
