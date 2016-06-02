@@ -2,19 +2,34 @@ package levelinfinite.ppp.filters;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ActivityLanding extends AppCompatActivity {
 
     Button openCamera, openGallery;
     private static final int SELECT_PICTURE = 1;
+    private static final int OPEN_CAMERA = 1;
     String selectedImagePath;
     String filemanagerstring;
+
+    Bitmap photoTakenFromCamera;
+    String photoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +40,20 @@ public class ActivityLanding extends AppCompatActivity {
         openCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Log.d("camera", "startCameraActivity()");
+                Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                if(intent.resolveActivity(getPackageManager())!=null){
+                    File photoFile = null;
+                    try{
+                        photoFile = createImageFile();
+                    }catch(IOException ioe){
+                        Log.d("IOException", "Create Image File IOE:" + ioe.toString());
+                    }
+                    if(photoFile!=null){
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                        startActivityForResult(intent, OPEN_CAMERA);
+                    }
+                }
             }
         });
         openGallery = (Button) findViewById(R.id.openGallery);
@@ -42,8 +70,8 @@ public class ActivityLanding extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == SELECT_PICTURE) {
+        if(resultCode == RESULT_OK){
+            if (requestCode == SELECT_PICTURE && data !=null) {
                 Uri selectedImageUri = data.getData();
 
                 //OI FILE Manager
@@ -53,23 +81,46 @@ public class ActivityLanding extends AppCompatActivity {
                 selectedImagePath = getPath(selectedImageUri);
 
                 //DEBUG PURPOSE - you can delete this if you want
-                if (selectedImagePath != null){
+                if (selectedImagePath != null) {
                     System.out.println(selectedImagePath);
                     System.out.println(selectedImagePath);
-                }else
+                } else
                     System.out.println("selectedImagePath is null");
 
-                if(filemanagerstring!=null)
+                if (filemanagerstring != null)
                     System.out.println(filemanagerstring);
                 else System.out.println("filemanagerstring is null");
 
-                if(selectedImagePath!=null){
+
+                if (selectedImagePath != null) {
                     Intent activityFilters = new Intent(getApplicationContext(), ActivityFilters.class);
                     activityFilters.putExtra("imagePath", selectedImageUri.toString());
                     startActivity(activityFilters);
                 }
+            }else if(requestCode == OPEN_CAMERA) {
+                Log.i("YO! to Camera", "resultCode: " + resultCode);
+                try {
+                    photoTakenFromCamera = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
+                            Uri.parse(photoPath));
+                    if (photoTakenFromCamera != null) {
+                        Intent activityFilters = new Intent(getApplicationContext(), ActivityFilters.class);
+                        activityFilters.putExtra("imagePath", Uri.parse(photoPath).toString());
+                        startActivity(activityFilters);
+                    }
+                } catch (IOException ioe) {
+                    Log.d("IOException", "Camera IOE:" + ioe.toString());
+                }
             }
         }
+    }
+
+    private File createImageFile() throws IOException{
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "FILTER_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        photoPath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     public String getPath(Uri uri) {
