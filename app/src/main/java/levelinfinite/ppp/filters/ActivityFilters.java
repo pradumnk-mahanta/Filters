@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
@@ -18,7 +20,7 @@ public class ActivityFilters extends AppCompatActivity {
 
     ImageView imageFilter;
     String selectedImage;
-    Bitmap selectedImageBitmap;
+    Bitmap selectedImageBitmap, processedImage;
     FloatingActionButton addFab, removeFab;
 
     @Override
@@ -32,8 +34,12 @@ public class ActivityFilters extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent activityFilters = new Intent(getApplicationContext(), ActivityExport.class);
+                processedImage = selectedImageBitmap;
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                processedImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                byte[] pictureArray = byteArrayOutputStream.toByteArray();
+                activityFilters.putExtra("finalImage", pictureArray);
                 startActivity(activityFilters);
-                finish();
             }
         });
 

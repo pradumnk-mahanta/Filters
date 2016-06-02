@@ -3,19 +3,15 @@ package levelinfinite.ppp.filters;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -96,6 +92,7 @@ public class ActivityLanding extends AppCompatActivity {
                     Intent activityFilters = new Intent(getApplicationContext(), ActivityFilters.class);
                     activityFilters.putExtra("imagePath", selectedImageUri.toString());
                     startActivity(activityFilters);
+                    finish();
                 }
             }else if(requestCode == OPEN_CAMERA) {
                 Log.i("YO! to Camera", "resultCode: " + resultCode);
@@ -106,6 +103,7 @@ public class ActivityLanding extends AppCompatActivity {
                         Intent activityFilters = new Intent(getApplicationContext(), ActivityFilters.class);
                         activityFilters.putExtra("imagePath", Uri.parse(photoPath).toString());
                         startActivity(activityFilters);
+                        finish();
                     }
                 } catch (IOException ioe) {
                     Log.d("IOException", "Camera IOE:" + ioe.toString());
